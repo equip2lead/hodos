@@ -28,3 +28,7 @@ npm run dev
 ## Design
 The clickable bilingual prototype (customer app, business side, super admin) is the
 "Hodos Brand Concepts" canvas on claude.ai.
+
+## Deploy
+Vercel project `hodos` (team "Denis Ekobena's projects") deploys `main` automatically.
+Env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set in Vercel.
