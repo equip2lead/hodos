@@ -1,45 +1,27 @@
 import { cookies } from "next/headers";
+import type { Lang } from "./dict";
 
-export type Lang = "fr" | "en";
-
-export const dict = {
-  en: {
-    tagline: "Your way to everything.",
-    location: "Yaoundé, Cameroon",
-    search: "Search shops, places and products",
-    login: "Login",
-    order: "Order & get it delivered",
-    orderSub: "Shops that take orders on Hodos",
-    book: "Book",
-    bookSub: "Appointments, sessions and jobs",
-    discover: "Discover around you",
-    discoverSub: "Find the place: times, contacts, directions",
-    notConfigured: "Database not connected yet. Add the Supabase keys in Vercel to load live categories.",
-    business: "Own a shop, church or business?",
-    businessSub: "Get listed on Hodos for free and let Yaoundé find you.",
-    listMine: "List my business",
-    switchTo: "FR",
-  },
-  fr: {
-    tagline: "Le chemin vers tout.",
-    location: "Yaoundé, Cameroun",
-    search: "Rechercher boutiques, lieux et produits",
-    login: "Connexion",
-    order: "Commandez, on vous livre",
-    orderSub: "Boutiques qui prennent les commandes sur Hodos",
-    book: "Réserver",
-    bookSub: "Rendez-vous, séances et travaux",
-    discover: "À découvrir autour de vous",
-    discoverSub: "Trouvez le lieu : horaires, contacts, itinéraire",
-    notConfigured: "Base de données pas encore connectée. Ajoutez les clés Supabase dans Vercel pour charger les catégories.",
-    business: "Vous avez une boutique, une église ou une entreprise ?",
-    businessSub: "Inscrivez-vous gratuitement sur Hodos et laissez Yaoundé vous trouver.",
-    listMine: "Inscrire mon activité",
-    switchTo: "EN",
-  },
-} as const;
+export { dict, fcfa } from "./dict";
+export type { Lang, Dict } from "./dict";
 
 export async function getLang(): Promise<Lang> {
   const c = await cookies();
   return c.get("lang")?.value === "en" ? "en" : "fr";
+}
+
+export type SavedAddress = { label: string; lat: number; lng: number; detail?: string };
+
+// The visitor's chosen delivery address (set on /address, stored in a cookie).
+export async function getAddress(): Promise<SavedAddress | null> {
+  const raw = (await cookies()).get("hodos_addr")?.value;
+  if (!raw) return null;
+  try {
+    const a = JSON.parse(decodeURIComponent(raw));
+    if (typeof a?.label === "string" && typeof a?.lat === "number" && typeof a?.lng === "number") return a;
+  } catch {}
+  return null;
+}
+
+export async function addressSkipped() {
+  return (await cookies()).get("hodos_addr_skip")?.value === "1";
 }

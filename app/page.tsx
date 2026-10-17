@@ -1,108 +1,137 @@
 import Link from "next/link";
-import { createClient, supabaseConfigured } from "@/lib/supabase/server";
-import { dict, getLang } from "@/lib/i18n";
-import { setLang } from "./actions";
+import { addressSkipped, dict, getAddress, getLang } from "@/lib/i18n";
+import { getHodosShop } from "@/lib/data";
+import { CATS, catBySlug, catImg as img, catName, type Cat } from "@/lib/cats";
+import { Footer, Header } from "@/components/chrome";
+import { AddressPrompt, Banners } from "@/components/home-client";
+import { ProductCard } from "@/components/product-card";
 
-type Category = { id: number; kind: "order" | "book" | "list"; slug: string; name_en: string; name_fr: string; image_url: string | null };
+export const dynamic = "force-dynamic";
 
-function HMark({ className = "" }: { className?: string }) {
+
+function Tile({ href, label, src, dots }: { href: string; label: string; src?: string; dots?: boolean }) {
   return (
-    <svg viewBox="0 0 120 120" className={className} aria-hidden="true">
-      <g fill="currentColor" stroke="currentColor" strokeWidth="4" strokeLinejoin="round">
-        <polygon points="13,100 39,100 58,20 32,20" />
-        <polygon points="57,100 83,100 102,20 76,20" />
-        <polygon points="27,73 103,48 107,32 31,57" />
-      </g>
-    </svg>
+    <Link href={href} className="flex min-w-0 flex-col items-center gap-2 text-center">
+      <span className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-[26px] bg-hodos-grey">
+        {dots ? (
+          <span className="grid grid-cols-3 gap-1.5">
+            {Array.from({ length: 9 }).map((_, i) => <span key={i} className="h-2.5 w-2.5 rounded-full bg-hodos-ink" />)}
+          </span>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={src} alt="" className="h-full w-full object-cover" />
+        )}
+      </span>
+      <span className="w-full text-[13px] leading-tight tracking-tight sm:text-lg">{label}</span>
+    </Link>
   );
 }
 
 export default async function Home() {
-  const lang = await getLang();
+  const [lang, address, skipped, { shop, products }] = await Promise.all([
+    getLang(), getAddress(), addressSkipped(), getHodosShop(),
+  ]);
   const t = dict[lang];
+  const name = (c: Cat) => catName(c, lang);
+  const label = (slug: string, _f?: string) => name(catBySlug(slug)!);
 
-  let categories: Category[] = [];
-  if (supabaseConfigured()) {
-    const supabase = await createClient();
-    const { data } = await supabase.from("categories").select("id, kind, slug, name_en, name_fr, image_url").order("sort");
-    categories = (data ?? []) as Category[];
-  }
-
-  const groups: { kind: Category["kind"]; title: string; sub: string; tint: string }[] = [
-    { kind: "order", title: t.order, sub: t.orderSub, tint: "bg-hodos-grey" },
-    { kind: "book", title: t.book, sub: t.bookSub, tint: "bg-hodos-grey" },
-    { kind: "list", title: t.discover, sub: t.discoverSub, tint: "bg-hodos-blush" },
-  ];
+  const grid = ["restaurants", "groceries", "pharmacy", "bakeries", "gas", "water", "beauty"];
+  const trendy = ["electronics", "fashion", "gifts", "bookshops"];
+  const discover = CATS.filter((c) => c.kind === "list");
+  const book = CATS.filter((c) => c.kind === "book");
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-6">
-      <header className="flex flex-col gap-3">
-        <p className="text-base font-medium">{t.location}</p>
-        <div className="flex items-center justify-between gap-3">
-          <Link href="/" aria-label="Hodos" className="flex items-center gap-2 text-hodos-red">
-            <HMark className="h-14 w-14" />
-            <span className="font-display -skew-x-6 text-3xl font-extrabold text-hodos-ink">hodos</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <form action={setLang}>
-              <input type="hidden" name="lang" value={lang === "fr" ? "en" : "fr"} />
-              <input type="hidden" name="back" value="/" />
-              <button className="min-h-12 rounded-full border border-zinc-200 px-4 font-bold">{t.switchTo}</button>
-            </form>
-            <Link href="/login" className="flex min-h-12 items-center rounded-full bg-hodos-grey px-6 font-bold">
-              {t.login}
-            </Link>
-          </div>
-        </div>
-        <label className="flex min-h-14 items-center gap-3 rounded-full border-[1.5px] border-zinc-200 px-5">
-          <span className="sr-only">{t.search}</span>
-          <input type="search" placeholder={t.search} className="min-w-0 flex-1 bg-transparent text-base outline-none" />
-        </label>
-      </header>
+    <>
+      <main id="top" className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pt-4">
+        <Header lang={lang} address={address} />
 
-      {!supabaseConfigured() && (
-        <p className="rounded-2xl border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">{t.notConfigured}</p>
-      )}
+        {!address && !skipped && <AddressPrompt lang={lang} />}
 
-      {groups.map((g) => {
-        const items = categories.filter((c) => c.kind === g.kind);
-        if (items.length === 0) return null;
-        return (
-          <section key={g.kind} className="flex flex-col gap-3">
-            <div>
-              <h2 className="font-display text-2xl font-extrabold">{g.title}</h2>
-              <p className="text-sm text-zinc-600">{g.sub}</p>
+        <Banners lang={lang} />
+
+        <section className="grid grid-cols-4 gap-x-2.5 gap-y-5 sm:grid-cols-8 sm:gap-x-4">
+          {grid.map((s) => <Tile key={s} href={`/c/${s}`} label={label(s, s)} src={img(s)} />)}
+          <Tile href="/services" label={t.allServices} dots />
+        </section>
+
+        {shop && products.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="font-display text-2xl font-extrabold sm:text-3xl">{t.hodosShop}</h2>
+                <p className="text-zinc-500">{t.hodosShopSub}</p>
+              </div>
             </div>
-            <div className="grid grid-cols-4 gap-x-3 gap-y-5 sm:grid-cols-6 lg:grid-cols-8">
-              {items.map((c) => (
-                <Link key={c.id} href={`/c/${c.slug}`} className="flex flex-col items-center gap-2 text-center">
-                  <span className={`flex aspect-square w-full items-center justify-center overflow-hidden rounded-3xl ${g.tint}`}>
-                    {c.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.image_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <HMark className="h-1/2 w-1/2 text-hodos-red/30" />
-                    )}
-                  </span>
-                  <span className="text-sm font-medium leading-tight">{lang === "fr" ? c.name_fr : c.name_en}</span>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+              {products.slice(0, 8).map((p) => <ProductCard key={p.id} product={p} lang={lang} />)}
+            </div>
+            <Link href="/shop" className="mx-auto flex h-16 w-full max-w-md items-center justify-center rounded-full bg-hodos-grey text-xl font-bold">
+              {t.showMore}
+            </Link>
+          </section>
+        )}
+
+        <section className="-mx-4 flex flex-col gap-4 bg-hodos-grey px-4 py-7 sm:mx-0 sm:rounded-[28px]">
+          <h2 className="flex items-center gap-2 text-2xl font-bold">
+            <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true"><path fill="currentColor" d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" /></svg>
+            {t.trendy}
+          </h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {trendy.map((s) => (
+              <Link key={s} href={`/c/${s}`} className="flex h-20 min-w-0 items-center gap-2.5 rounded-[22px] bg-white pl-2.5 pr-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img(s)} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                <span className="min-w-0 flex-1 text-[15px] font-medium leading-tight tracking-tight sm:text-lg">{label(s, s)}</span>
+                <span aria-hidden="true" className="text-xl text-zinc-400 max-sm:hidden">›</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {book.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <h2 className="font-display text-2xl font-extrabold sm:text-3xl">{t.book}</h2>
+            <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
+              {book.map((c) => (
+                <Link key={c.slug} href={`/c/${c.slug}`} className="flex w-36 shrink-0 flex-col gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img(c.slug)} alt="" className="aspect-square w-full rounded-[28px] object-cover" />
+                  <span className="text-lg font-bold leading-tight">{name(c)}</span>
                 </Link>
               ))}
             </div>
           </section>
-        );
-      })}
+        )}
 
-      <section className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] bg-hodos-red p-7 text-white">
-        <div className="flex-[1_1_260px]">
-          <h2 className="font-display text-2xl font-extrabold">{t.business}</h2>
-          <p className="text-red-100">{t.businessSub}</p>
-        </div>
-        <Link href="/login?next=/business" className="flex min-h-12 items-center rounded-full bg-white px-6 font-bold text-hodos-red">
-          {t.listMine}
-        </Link>
-      </section>
+        {discover.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div>
+              <h2 className="font-display text-2xl font-extrabold sm:text-3xl">{t.discover}</h2>
+              <p className="text-zinc-500">{t.discoverSub}</p>
+            </div>
+            <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
+              {discover.map((c) => (
+                <Link key={c.slug} href={`/c/${c.slug}`} className="flex w-36 shrink-0 flex-col gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img(c.slug)} alt="" className="aspect-square w-full rounded-[28px] object-cover" />
+                  <span className="text-lg font-bold leading-tight">{name(c)}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
-      <footer className="pb-6 text-sm text-zinc-500">© 2026 Hodos · {t.tagline}</footer>
-    </main>
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] bg-hodos-red p-7 text-white">
+          <div className="flex-[1_1_260px]">
+            <h2 className="font-display text-2xl font-extrabold">{t.business}</h2>
+            <p className="text-red-100">{t.businessSub}</p>
+          </div>
+          <Link href="/login?next=/business" className="flex h-14 items-center rounded-full bg-white px-6 font-bold text-hodos-red">
+            {t.listMine}
+          </Link>
+        </section>
+      </main>
+      <Footer lang={lang} />
+    </>
   );
 }
