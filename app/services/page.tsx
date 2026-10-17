@@ -16,6 +16,15 @@ export default async function ServicesPage() {
         <Link href="/" aria-label="←" className="flex h-12 w-12 items-center justify-center rounded-full bg-hodos-grey text-xl">←</Link>
         <h1 className="font-display text-3xl font-extrabold">{fr ? "Tous les services" : "All services"}</h1>
       </div>
+      <Link href="/courses" className="flex items-center gap-4 rounded-[28px] bg-hodos-ink p-5 text-white">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/img/cat/libraries.jpg" alt="" className="h-20 w-20 rounded-2xl object-cover" />
+        <span className="flex-1">
+          <b className="block font-display text-2xl">{fr ? "Formations" : "Courses"}</b>
+          <span className="text-zinc-300">{fr ? "CapCut, leadership et plus. Inscription en 1 minute." : "CapCut, leadership and more. Sign up in 1 minute."}</span>
+        </span>
+        <span className="text-2xl">›</span>
+      </Link>
       {groups.map((g) => (
         <section key={g.kind} className="flex flex-col gap-4">
           <div>

@@ -30,18 +30,19 @@ from hodos.profiles p where p.role = 'super_admin'
 order by p.created_at limit 1
 on conflict (slug) do nothing;
 
--- Sample products (replace from /admin/products)
-insert into hodos.products (business_id, section, name_en, name_fr, price_fcfa, compare_at_fcfa, featured, sort, description_fr, description_en)
-select b.id, x.section, x.name_en, x.name_fr, x.price, x.compare_at, true, x.sort, x.dfr, x.den
+-- Products: Youghazi perfumes (real) + sample cleaning products (replace from /admin/products)
+insert into hodos.products (business_id, section, name_en, name_fr, price_fcfa, compare_at_fcfa, image_url, featured, sort, description_fr, description_en)
+select b.id, x.section, x.name_en, x.name_fr, x.price, x.compare_at, x.img, true, x.sort, x.dfr, x.den
 from hodos.businesses b,
 (values
-  ('Perfume', 'Hodos Signature perfume 50 ml', 'Parfum Hodos Signature 50 ml', 12000, 15000, 1, 'Parfum longue tenue, notes boisées et florales.', 'Long-lasting perfume, woody and floral notes.'),
-  ('Soap', 'Shea black soap 200 g', 'Savon noir au karité 200 g', 1500, null, 2, 'Savon naturel au beurre de karité.', 'Natural soap with shea butter.'),
-  ('Soap', 'Marseille soap 400 g', 'Savon de Marseille 400 g', 1000, null, 3, 'Pour le linge et la maison.', 'For laundry and the home.'),
-  ('Cleaning', 'Dishwashing liquid 1 L', 'Liquide vaisselle 1 L', 1200, 1500, 4, 'Dégraisse vite, parfum citron.', 'Cuts grease fast, lemon scent.'),
-  ('Cleaning', 'Bleach 1 L', 'Eau de Javel 1 L', 800, null, 5, 'Désinfecte sols, sanitaires et linge blanc.', 'Disinfects floors, toilets and whites.'),
-  ('Cleaning', 'Washing powder 1 kg', 'Lessive en poudre 1 kg', 1800, null, 6, 'Linge propre, main et machine.', 'Clean laundry, hand and machine.')
-) as x(section, name_en, name_fr, price, compare_at, sort, dfr, den)
+  ('Parfums', 'Youghazi Pour Femme 50 ml', 'Youghazi Pour Femme 50 ml', 15000, null::int, '/img/products/youghazi-femme.jpg', 1, 'Youghazi Fragrance Collection. Eau de parfum pour femme, 50 ml.', 'Youghazi Fragrance Collection. Eau de parfum for women, 50 ml.'),
+  ('Parfums', 'Youghazi Pour Homme 50 ml', 'Youghazi Pour Homme 50 ml', 15000, null::int, '/img/products/youghazi-homme.jpg', 2, 'Youghazi Fragrance Collection. Eau de parfum pour homme, 50 ml.', 'Youghazi Fragrance Collection. Eau de parfum for men, 50 ml.'),
+  ('Parfums', 'Youghazi Duo: Him & Her', 'Coffret Duo Youghazi : Lui & Elle', 27000, 30000, '/img/products/youghazi-duo.jpg', 3, 'Pour Homme + Pour Femme, 2 × 50 ml. Idéal en cadeau.', 'Pour Homme + Pour Femme, 2 × 50 ml. A perfect gift.'),
+  ('Entretien', 'Shea black soap 200 g', 'Savon noir au karité 200 g', 1500, null::int, null, 10, 'Savon naturel au beurre de karité.', 'Natural soap with shea butter.'),
+  ('Entretien', 'Dishwashing liquid 1 L', 'Liquide vaisselle 1 L', 1200, 1500, null, 11, 'Dégraisse vite, parfum citron.', 'Cuts grease fast, lemon scent.'),
+  ('Entretien', 'Bleach 1 L', 'Eau de Javel 1 L', 800, null::int, null, 12, 'Désinfecte sols, sanitaires et linge blanc.', 'Disinfects floors, toilets and whites.'),
+  ('Entretien', 'Washing powder 1 kg', 'Lessive en poudre 1 kg', 1800, null::int, null, 13, 'Linge propre, main et machine.', 'Clean laundry, hand and machine.')
+) as x(section, name_en, name_fr, price, compare_at, img, sort, dfr, den)
 where b.slug = 'hodos-shop'
   and not exists (select 1 from hodos.products p where p.business_id = b.id);
 

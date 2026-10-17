@@ -53,3 +53,26 @@ export async function searchProducts(q: string): Promise<Product[]> {
   const { data } = await s.from("products").select(PRODUCT_COLS).or(`name_fr.ilike.${like},name_en.ilike.${like}`).limit(40);
   return (data ?? []) as Product[];
 }
+
+export type Course = {
+  id: string; slug: string; title_fr: string; title_en: string; summary_fr: string | null; summary_en: string | null;
+  trainer: string | null; format: "presentiel" | "en_ligne" | "hybride"; location: string | null; price_fcfa: number;
+  starts_on: string | null; schedule_fr: string | null; schedule_en: string | null; seats: number | null; color: string; image_url: string | null;
+};
+const COURSE_COLS = "id, slug, title_fr, title_en, summary_fr, summary_en, trainer, format, location, price_fcfa, starts_on, schedule_fr, schedule_en, seats, color, image_url";
+
+export async function getCourses(): Promise<Course[]> {
+  if (!supabaseConfigured()) return [];
+  const s = await createClient();
+  const { data } = await s.from("courses").select(COURSE_COLS).eq("is_published", true).order("sort");
+  return (data ?? []) as Course[];
+}
+
+export async function getCourse(slug: string): Promise<{ course: Course | null; left: number | null }> {
+  if (!supabaseConfigured()) return { course: null, left: null };
+  const s = await createClient();
+  const { data } = await s.from("courses").select(COURSE_COLS).eq("slug", slug).maybeSingle();
+  if (!data) return { course: null, left: null };
+  const { data: left } = await s.rpc("seats_left", { p_course: data.id });
+  return { course: data as Course, left: (left as number | null) ?? null };
+}

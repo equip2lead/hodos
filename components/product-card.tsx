@@ -6,7 +6,7 @@ import { AddButton, HMark } from "./ui";
 export function ProductImage({ product, lang, className = "" }: { product: Product; lang: Lang; className?: string }) {
   if (product.image_url) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={product.image_url} alt="" className={`h-full w-full object-contain p-4 ${className}`} />;
+    return <img src={product.image_url} alt="" className={`h-full w-full object-cover ${className}`} />;
   }
   return (
     <span className={`flex h-full w-full flex-col items-center justify-center gap-2 ${className}`}>

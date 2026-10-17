@@ -71,3 +71,45 @@ export async function saveStation(formData: FormData) {
   }).eq("slug", "hodos-shop");
   revalidatePath("/admin/products");
 }
+
+const ENROLL_STATUSES = ["pending", "confirmed", "paid", "cancelled"];
+const FORMATS = ["presentiel", "en_ligne", "hybride"];
+
+export async function saveCourse(formData: FormData) {
+  const { supabase } = await requireAdmin("/admin/courses");
+  const id = String(formData.get("id") || "");
+  const title_fr = String(formData.get("title_fr") || "").trim();
+  if (!title_fr) return;
+  const format = String(formData.get("format"));
+  const row: Record<string, unknown> = {
+    title_fr,
+    title_en: String(formData.get("title_en") || "").trim() || title_fr,
+    summary_fr: String(formData.get("summary_fr") || "").trim() || null,
+    trainer: String(formData.get("trainer") || "").trim() || null,
+    format: FORMATS.includes(format) ? format : "presentiel",
+    location: String(formData.get("location") || "").trim() || null,
+    price_fcfa: int(formData.get("price")) ?? 0,
+    starts_on: String(formData.get("starts_on") || "") || null,
+    schedule_fr: String(formData.get("schedule_fr") || "").trim() || null,
+    seats: int(formData.get("seats")) || null,
+    is_published: formData.get("is_published") === "on",
+  };
+  const photo = await uploadPhoto(supabase, formData.get("photo"));
+  if (photo) row.image_url = photo;
+  if (id) {
+    await supabase.from("courses").update(row).eq("id", id);
+  } else {
+    const slug = title_fr.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50) + "-" + Math.random().toString(36).slice(2, 6);
+    await supabase.from("courses").insert({ ...row, slug, sort: 50 });
+  }
+  revalidatePath("/admin/courses");
+  revalidatePath("/courses");
+}
+
+export async function setEnrollmentStatus(formData: FormData) {
+  const { supabase } = await requireAdmin("/admin/courses");
+  const status = String(formData.get("status"));
+  if (!ENROLL_STATUSES.includes(status)) return;
+  await supabase.from("enrollments").update({ status }).eq("id", String(formData.get("id")));
+  revalidatePath("/admin/courses");
+}

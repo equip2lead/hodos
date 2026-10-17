@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { addressSkipped, dict, getAddress, getLang } from "@/lib/i18n";
-import { getHodosShop } from "@/lib/data";
+import { getCourses, getHodosShop } from "@/lib/data";
+import { CourseCard } from "@/components/course-card";
 import { CATS, catBySlug, catImg as img, catName, type Cat } from "@/lib/cats";
 import { Footer, Header } from "@/components/chrome";
 import { AddressPrompt, Banners } from "@/components/home-client";
@@ -28,8 +29,8 @@ function Tile({ href, label, src, dots }: { href: string; label: string; src?: s
 }
 
 export default async function Home() {
-  const [lang, address, skipped, { shop, products }] = await Promise.all([
-    getLang(), getAddress(), addressSkipped(), getHodosShop(),
+  const [lang, address, skipped, { shop, products }, courses] = await Promise.all([
+    getLang(), getAddress(), addressSkipped(), getHodosShop(), getCourses(),
   ]);
   const t = dict[lang];
   const name = (c: Cat) => catName(c, lang);
@@ -68,6 +69,23 @@ export default async function Home() {
             <Link href="/shop" className="mx-auto flex h-16 w-full max-w-md items-center justify-center rounded-full bg-hodos-grey text-xl font-bold">
               {t.showMore}
             </Link>
+          </section>
+        )}
+
+        {courses.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="font-display text-2xl font-extrabold sm:text-3xl">{t.courses}</h2>
+                <p className="text-zinc-500">{t.coursesSub}</p>
+              </div>
+              <Link href="/courses" className="shrink-0 font-bold text-hodos-red">{t.seeAll}</Link>
+            </div>
+            <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
+              {courses.map((c) => (
+                <div key={c.id} className="w-72 shrink-0"><CourseCard course={c} lang={lang} /></div>
+              ))}
+            </div>
           </section>
         )}
 

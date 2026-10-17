@@ -36,7 +36,8 @@ type Banner = { title: string; sub: string; cta: string; href: string; img: stri
 export function Banners({ lang }: { lang: Lang }) {
   const t = dict[lang];
   const banners: Banner[] = [
-    { title: t.banner1, sub: t.banner1Sub, cta: t.banner1Cta, href: "/shop", img: "/img/banner_all.jpg", bg: "#1B1112", fg: "#FFFFFF", ctaBg: "#D3121F", ctaFg: "#FFFFFF", full: true },
+    { title: t.banner1, sub: t.banner1Sub, cta: t.banner1Cta, href: "/shop", img: "/img/products/youghazi-duo.jpg", bg: "#1B1112", fg: "#FFFFFF", ctaBg: "#D3121F", ctaFg: "#FFFFFF", full: true },
+    { title: t.banner5, sub: t.banner5Sub, cta: t.banner5Cta, href: "/courses", img: "/img/cat/libraries.jpg", bg: "#1B1112", fg: "#FFFFFF", ctaBg: "#D3121F", ctaFg: "#FFFFFF" },
     { title: t.banner2, sub: t.banner2Sub, cta: t.banner1Cta, href: "/c/pharmacy", img: "/img/cat/pharmacy.jpg", bg: "#D3121F", fg: "#FFFFFF", ctaBg: "#FFFFFF", ctaFg: "#D3121F" },
     { title: t.banner3, sub: t.banner3Sub, cta: t.banner1Cta, href: "/c/groceries", img: "/img/cat/groceries.jpg", bg: "#FFF4E6", fg: "#1B1112", ctaBg: "#D3121F", ctaFg: "#FFFFFF" },
     { title: t.banner4, sub: t.banner4Sub, cta: t.discoverCta, href: "/c/churches", img: "/img/cat/churches.jpg", bg: "#9E0B14", fg: "#FFFFFF", ctaBg: "#FFFFFF", ctaFg: "#D3121F" },

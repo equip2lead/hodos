@@ -61,7 +61,7 @@ export function Footer({ lang }: { lang: Lang }) {
       <a href="#top" className="block bg-zinc-200/70 py-4 text-center">{t.backToTop}</a>
       <div className="bg-hodos-grey px-4 pb-32 pt-8">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
-          {col(t.helpYou, [[t.support, "https://wa.me/"], [t.myOrders, "/orders"], [t.deals, "/shop"]])}
+          {col(t.helpYou, [[t.support, "https://wa.me/"], [t.myOrders, "/orders"], [t.deals, "/shop"], [lang === "fr" ? "Formations" : "Courses", "/courses"]])}
           {col(t.allServices, [[fr ? "Restaurants" : "Restaurants", "/c/restaurants"], [fr ? "Courses" : "Groceries", "/c/groceries"], [fr ? "Cadeaux & Fleurs" : "Gifts & Flowers", "/c/gifts"], [fr ? "Pharmacie" : "Pharmacy", "/c/pharmacy"]])}
           {col(t.market, [[fr ? "Électronique" : "Electronics", "/c/electronics"], [fr ? "Beauté" : "Beauty", "/c/beauty"], [fr ? "Mode" : "Fashion", "/c/fashion"], [fr ? "Librairies" : "Bookshops", "/c/bookshops"]])}
           {col(fr ? "Découvrir" : "Discover", [[fr ? "Églises" : "Churches", "/c/churches"], [fr ? "Hôpitaux" : "Hospitals", "/c/hospitals"], [fr ? "Hôtels" : "Hotels", "/c/hotels"], [fr ? "Cinémas" : "Cinemas", "/c/cinemas"]])}
